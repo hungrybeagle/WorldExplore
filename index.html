@@ -1,0 +1,115 @@
+<doctype html5>
+<html>
+	<head>
+		<style>
+			#map {
+				position: absolute;
+				left:10px;
+				top:10px;
+				border: 1px solid #aaa;
+				width: 150px;
+				height: 162px;
+				margin: auto;
+			}
+			#map td {
+				width: 30px;
+				height: 30px;
+				padding: 0;
+			}
+			section#control {
+				position: absolute;
+				left:180;
+				top:10px;
+				border: 1px solid black;
+				text-align:center;
+			}
+		</style>
+		<script
+		  src="https://code.jquery.com/jquery-3.4.1.js"
+		  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+		  crossorigin="anonymous"></script>		
+		<script>
+			var game = {
+				player : {
+					x: 10,
+					y: 10
+				},
+				createMap: function() {
+					let tbl = document.createElement("table");
+					tbl.setAttribute("id","mapTable");
+					tbl.setAttribute("cellspacing","0");
+					tbl.setAttribute("cellpadding","0");
+					
+					let tbldata = "";
+					for (let i = 0; i < 5; i++) {
+						tbldata += "<tr>";
+						for (let j = 0; j < 5; j++) {
+							tbldata += "<td></td>";
+						}
+						tbldata += "</tr>"
+					}
+					tbl.innerHTML = tbldata;
+					$("section#map").append(tbl);
+				},
+				gettile : function(row,col) {
+				var x = game.player.x - 2 + col;
+				var y = game.player.y + 2 - row;
+				console.log(x,y);
+					if (row==2 && col==2)
+						return "city";
+					else
+					return "forest";
+				},
+				redrawMap: function() {
+					var tiles = $("section#map").find("td");
+					for (var i = 0; i < 5; i++)
+						for (var j = 0; j < 5; j++) {
+							var tile = game.gettile(i,j);
+							tiles[5*i+j].innerHTML="<img src='map."+tile+".png'>";
+						}
+					
+				},
+				createEventListeners: function() {
+					$("button.nav").on("click", function(evt) {
+						let direction = evt.target.innerHTML;
+						switch (direction) {
+							case "North" : {
+								game.player.y++;
+							} break;
+							case "West" : {
+								game.player.x--;
+							} break;
+							case "East" : {
+								game.player.x++
+							} break;
+							case "South" : {
+								game.player.y--
+							} break;
+						}
+						console.log(game.player.x + " " + game.player.y);
+						game.redrawMap();
+					})
+				}
+			}
+			$(document).ready( function() {
+				game.createMap();
+				game.redrawMap();
+				game.createEventListeners();
+			}
+			)
+		</script>
+	</head>
+	<body>
+		<section id="map">
+		</section>
+		<section id="control">
+			<button type='button' class="nav">North</button><br>
+			<button type='button' class="nav">West</button>
+			<button type='button' class="nav">East</button><br>
+			<button type='button' class="nav">South</button><br>
+			
+			
+		</section>
+	</body>
+	
+</html>
