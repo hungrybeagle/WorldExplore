@@ -36,7 +36,12 @@
 				},
 				map : {
 					"10,10" : {
-						terrain : "city",
+						contents : [
+							{
+								type: "city"
+							}
+						],
+						terrain : "plains",
 						sprawling : false
 					},
 					"10,9" : {
@@ -91,19 +96,41 @@
 					tbl.innerHTML = tbldata;
 					$("section#map").append(tbl);
 				},
-				genTile : function(see,me) {
-					console.log("gen: " + see[0] + " + " + see[1])
-					console.log(me);
-
+				genContents : function() {
 					
-					if (game.map[me[0]+","+me[1]].sprawling) {
-						console.log('sprawling');
-						return 'mountain';
+					return [ {
+						type : "city"
+						}
+					]
+				},
+				genTile : function(see,me) {
+					console.log(me[0]+","+me[1]);
+					let seecode = see[0]+","+see[1];
+					let mecode = me[0] + "," + me[1];
+					let terrainName = ["plains","forest","hills","mountain","swamp"];
+					let newTerrain;
+					let encounter;
+					let distance = Math.sqrt(Math.pow(me[0],2)+Math.pow(me[1],2));
+					if (Math.random() < 0.25*Math.pow(0.5,-.05*distance))
+						newTerrain = "water";
+					else
+					if (Math.random() < .5)
+						newTerrain = game.map[mecode].terrain;
+					else
+						newTerrain = terrainName[Math.floor(Math.random()*terrainName.length)]
+					game.map[seecode] = {
+						terrain : newTerrain,
+						sprawling : true
 					}
-					else {
-						console.log('not sprawling');
-						return 'forest';
-					}
+					if (Math.random() < 0.01 && newTerrain != "water" )
+						game.map[seecode].contents = game.genContents();
+					return game.map[seecode].terrain;
+				},
+				seeTile: function(currTile) {
+						if (game.map[currTile].contents && game.map[currTile].contents.length > 0)
+							return game.map[currTile].contents[0].type;
+						else
+							return game.map[currTile].terrain;				
 				},
 				gettile : function(row,col) {
 					var x = game.player.x - 3 + col;
@@ -112,13 +139,16 @@
 					var see = [x,y];
 					//console.log(x+","+y);
 					let currTile = x + "," + y;
-					if (game.map[currTile])
-						return game.map[currTile].terrain;
+					if (game.map[currTile]) {
+						return game.seeTile(currTile);
+					}
 					else
 						if (Math.abs(row-3) <2 && (Math.abs(col-3) < 2)) {
 							let see = [x,y];
-							return game.genTile(see,center);
+							game.genTile(see,center);
+							return game.seeTile(currTile);
 							}
+					else
 						return "unknown";
 				},
 				redrawMap: function() {
@@ -135,21 +165,44 @@
 				createEventListeners: function() {
 					$("button.nav").on("click", function(evt) {
 						let direction = evt.target.innerHTML;
+						console.log(direction);	
+						let oldLoc = [game.player.x,game.player.y];
 						switch (direction) {
-							case "North" : {
+							case "N" : {
+								console.log('north');
 								game.player.y++;
 							} break;
-							case "West" : {
+							case "NW" : {
+								game.player.y++
 								game.player.x--;
 							} break;
-							case "East" : {
+							case "NE" : {
+								game.player.y++
 								game.player.x++
 							} break;
-							case "South" : {
+							case "W" : {
+								game.player.x--;
+							} break;
+							case "E" : {
+								game.player.x++
+							} break;
+							case "S" : {
 								game.player.y--
 							} break;
+							case "SW" : {
+								game.player.y--
+								game.player.x--;
+							} break;
+							case "SE" : {
+								game.player.y--
+								game.player.x++
+							} break;							
 						}
 						console.log(game.player.x + " " + game.player.y);
+						if (game.map[game.player.x+","+game.player.y].terrain == 'water') {
+							game.player.x = oldLoc[0];
+							game.player.y = oldLoc[1];
+						}
 						game.redrawMap();
 					})
 				}
@@ -166,10 +219,15 @@
 		<section id="map">
 		</section>
 		<section id="control">
-			<button type='button' class="nav">North</button><br>
-			<button type='button' class="nav">West</button>
-			<button type='button' class="nav">East</button><br>
-			<button type='button' class="nav">South</button><br>
+			<button type='button' class="nav">NW</button>
+			<button type='button' class="nav">N</button>
+			<button type='button' class="nav">NE</button><br>
+			<button type='button' class="nav">W</button>
+			<button type='button' class="nav">Search</button>
+			<button type='button' class="nav">E</button><br>
+			<button type='button' class="nav">SW</button>
+			<button type='button' class="nav">S</button>
+			<button type='button' class="nav">SE</button><br>
 			
 			
 		</section>
