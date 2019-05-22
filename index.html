@@ -7,8 +7,8 @@
 				left:10px;
 				top:10px;
 				border: 1px solid #aaa;
-				width: 150px;
-				height: 162px;
+				width: 210px;
+				height: 212px;
 				margin: auto;
 			}
 			#map td {
@@ -18,7 +18,7 @@
 			}
 			section#control {
 				position: absolute;
-				left:180;
+				left: 220;
 				top:10px;
 				border: 1px solid black;
 				text-align:center;
@@ -34,6 +34,46 @@
 					x: 10,
 					y: 10
 				},
+				map : {
+					"10,10" : {
+						terrain : "city",
+						sprawling : false
+					},
+					"10,9" : {
+						terrain : "plains",
+						sprawling : true
+					},
+					"10,11" : {
+						terrain : "plains",
+						sprawling : true
+					},
+					"9,9" : {
+						terrain : "plains",
+						sprawling : true
+					},
+					"9,10" : {
+						terrain : "plains",
+						sprawling : true
+					},
+					"9,11" : {
+						terrain : "plains",
+						sprawling : true
+					},
+					"11,9" : {
+						terrain : "plains",
+						sprawling : true
+					},
+					"11,10" : {
+						terrain : "plains",
+						sprawling : true
+					},
+					"11,11" : {
+						terrain : "plains",
+						sprawling : true
+					},
+					
+					
+				},
 				createMap: function() {
 					let tbl = document.createElement("table");
 					tbl.setAttribute("id","mapTable");
@@ -41,9 +81,9 @@
 					tbl.setAttribute("cellpadding","0");
 					
 					let tbldata = "";
-					for (let i = 0; i < 5; i++) {
+					for (let i = 0; i < 7; i++) {
 						tbldata += "<tr>";
-						for (let j = 0; j < 5; j++) {
+						for (let j = 0; j < 7; j++) {
 							tbldata += "<td></td>";
 						}
 						tbldata += "</tr>"
@@ -51,23 +91,46 @@
 					tbl.innerHTML = tbldata;
 					$("section#map").append(tbl);
 				},
+				genTile : function(see,me) {
+					console.log("gen: " + see[0] + " + " + see[1])
+					console.log(me);
+
+					
+					if (game.map[me[0]+","+me[1]].sprawling) {
+						console.log('sprawling');
+						return 'mountain';
+					}
+					else {
+						console.log('not sprawling');
+						return 'forest';
+					}
+				},
 				gettile : function(row,col) {
-				var x = game.player.x - 2 + col;
-				var y = game.player.y + 2 - row;
-				console.log(x,y);
-					if (row==2 && col==2)
-						return "city";
+					var x = game.player.x - 3 + col;
+					var y = game.player.y + 3 - row;
+					var center = [game.player.x,game.player.y]
+					var see = [x,y];
+					//console.log(x+","+y);
+					let currTile = x + "," + y;
+					if (game.map[currTile])
+						return game.map[currTile].terrain;
 					else
-					return "forest";
+						if (Math.abs(row-3) <2 && (Math.abs(col-3) < 2)) {
+							let see = [x,y];
+							return game.genTile(see,center);
+							}
+						return "unknown";
 				},
 				redrawMap: function() {
 					var tiles = $("section#map").find("td");
-					for (var i = 0; i < 5; i++)
-						for (var j = 0; j < 5; j++) {
+					for (var i = 0; i < 7; i++)
+						for (var j = 0; j < 7; j++) {
 							var tile = game.gettile(i,j);
-							tiles[5*i+j].innerHTML="<img src='map."+tile+".png'>";
+							//console.log("map."+tile+".png")
+							tiles[7*i+j].style.backgroundImage="url(map."+tile+".png)";
+							//tiles[5*i+j].innerHTML="<img src='map."+tile+".png'>";
 						}
-					
+					tiles[24].innerHTML="<image src='sprite.png'>";
 				},
 				createEventListeners: function() {
 					$("button.nav").on("click", function(evt) {
